@@ -1,0 +1,1 @@
+export const NOTE_PREVIEW_MAX_LENGTH = 40;
