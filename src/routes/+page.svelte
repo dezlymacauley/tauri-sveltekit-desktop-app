@@ -1,156 +1,301 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
 
-  let name = $state("");
-  let greetMsg = $state("");
-
-  async function greet(event: Event) {
-    event.preventDefault();
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    greetMsg = await invoke("greet", { name });
-  }
 </script>
 
-<main class="container">
-  <h1>Welcome to Tauri + Svelte</h1>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">Notes</div>
+    <div class="topbar-actions">
+      <input id="searchInput" class="search" placeholder="Search notes…" disabled />
+      <button id="newBtn" class="btn">New</button>
+      <button id="openWinBtn" class="btn" disabled>Open Window</button>
+      <button id="deleteBtn" class="btn danger" disabled>Delete</button>
+    </div>
+  </header>
 
-  <div class="row">
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-    </a>
-    <a href="https://tauri.app" target="_blank">
-      <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank">
-      <img src="/svelte.svg" class="logo svelte-kit" alt="SvelteKit Logo" />
-    </a>
+  <div class="content">
+    <aside class="sidebar">
+      <div class="sidebar-title">Notes</div>
+      <div id="notesList" class="list"></div>
+    </aside>
+
+    <main class="editor">
+      <div class="editor-header">
+        <input id="titleInput" class="title" placeholder="Title" disabled />
+        <div id="status" class="status">Idle</div>
+      </div>
+      <textarea id="bodyInput" class="body" placeholder="Start typing..." disabled></textarea>
+    </main>
   </div>
-  <p>Click on the Tauri, Vite, and SvelteKit logos to learn more.</p>
-
-  <form class="row" onsubmit={greet}>
-    <input id="greet-input" placeholder="Enter a name..." bind:value={name} />
-    <button type="submit">Greet</button>
-  </form>
-  <p>{greetMsg}</p>
-</main>
+</div>
 
 <style>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.svelte-kit:hover {
-  filter: drop-shadow(0 0 2em #ff3e00);
-}
-
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
+  --bg: #0f1216;
+  --panel: #141a20;
+  --panel2: #10161c;
+  --text: #e8eef5;
+  --muted: #9aa7b4;
+  --border: rgba(255, 255, 255, 0.08);
+  --btn: rgba(255, 255, 255, 0.08);
+  --btn2: rgba(255, 255, 255, 0.12);
+  --danger: rgba(255, 80, 80, 0.18);
+  --primary: rgba(90, 160, 255, 0.22);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --radius: 14px;
+  --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --glass-bg: rgba(20, 26, 32, 0.65);
+  --header-bg: rgba(16, 22, 28, 0.65);
+  --field-bg: rgba(255, 255, 255, 0.04);
+  --row-bg: rgba(255, 255, 255, 0.03);
+  --row-hover-bg: rgba(255, 255, 255, 0.05);
+  --tag-hover-bg: rgba(255, 255, 255, 0.06);
+  --selected-border: rgba(90, 160, 255, 0.45);
+  --selected-bg: rgba(90, 160, 255, 0.12);
 }
 
-.container {
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
   margin: 0;
-  padding-top: 10vh;
+  background:
+    radial-gradient(1200px 800px at 30% 10%, rgba(90, 160, 255, 0.12), transparent 60%),
+    radial-gradient(900px 600px at 80% 30%, rgba(255, 140, 90, 0.1), transparent 55%), var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+.app {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: 56px 1fr;
+  overflow: hidden;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.search {
+  width: 260px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 12px;
+  padding: 12px;
+  min-height: 0;
+}
+
+.sidebar,
+.editor {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.sidebar {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  text-align: center;
+  min-height: 0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
+.sidebar-title {
+  padding: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  background: var(--header-bg);
 }
 
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
+.list {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  overflow: auto;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+#notesList {
+  flex: 1;
+  min-height: 0;
 }
 
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
+.note-row {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--row-bg);
   cursor: pointer;
 }
 
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
+.note-row:hover {
+  background: var(--row-hover-bg);
 }
 
-input,
-button {
+.note-title {
+  font-weight: 650;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.note-sub {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  gap: 10px;
+}
+
+.editor {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 0;
+}
+
+.editor-header {
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: var(--header-bg);
+}
+
+.title {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.status {
+  font-size: 12px;
+  color: var(--muted);
+  min-width: 80px;
+  text-align: right;
+}
+
+.body {
+  width: 100%;
+  height: 100%;
+  padding: 14px;
+  border: none;
   outline: none;
+  resize: none;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
-#greet-input {
-  margin-right: 5px;
+.btn {
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--btn);
+  color: var(--text);
+  cursor: pointer;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
-  }
-
-  a:hover {
-    color: #24c8db;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
+.btn:hover {
+  background: var(--btn2);
 }
 
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: var(--primary);
+}
+
+.btn.danger {
+  background: var(--danger);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  max-height: 140px;
+  overflow: auto;
+}
+
+.tag-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--field-bg);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.tag-pill:hover {
+  background: var(--tag-hover-bg);
+}
+
+.tags-input {
+  width: 240px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.search,
+.title,
+.tags-input {
+  border: 1px solid var(--border);
+  background: var(--field-bg);
+  color: var(--text);
+}
+
+.note-row.selected,
+.tag-pill.selected {
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
+}
+
+.app.single-mode .content {
+  grid-template-columns: 1fr;
+}
+
+.app.single-mode .sidebar {
+  display: none;
+}
 </style>
